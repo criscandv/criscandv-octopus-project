@@ -25,7 +25,7 @@ services:
       - django_chat_net
 
   api:
-    container_name: api
+    container_name: octopus_api
     build: ./api
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -38,20 +38,20 @@ services:
     networks:
       - django_chat_net
 
-  # socket:
-  #   container_name: c_budget
-  #   build: ./socket
-  #   command: npm run dev
-  #   stdin_open: true
-  #   volumes:
-  #     - ./c_budget:/usr/src/c_budget
-  #     - /usr/src/c_budget/node_modules
-  #   ports:
-  #     - 3000:3000
-  #   depends_on:
-  #     - api
-  #   networks:
-  #     - django_chat_net
+  socket:
+    container_name: octopus_socket
+    build: ./socket
+    command: npm start
+    stdin_open: true
+    volumes:
+      - ./socket:/usr/src/
+      - /usr/src/node_modules
+    ports:
+      - 3001:3001
+    depends_on:
+      - redis
+    networks:
+      - django_chat_net
 
   # front:
   #   container_name: c_front

@@ -1,0 +1,22 @@
+# FRONT
+front/node_modules
+front/package-lock.json
+
+# SOCKET
+socket/node_modules
+socket/package-lock.json
+
+# API
+api/coverage
+api/media
+api/*.pyc
+
+.DS_Store
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
