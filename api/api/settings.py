@@ -81,13 +81,14 @@ DATABASES = {
         'NAME': os.environ.get('POSTGRESQL_DB', 'db_chat'),
         'USER': os.environ.get('POSTGRESQL_USER', "postgres" ),
         'PASSWORD': os.environ.get('POSTGRESQL_PASSWORD', 'postgres'),
-        'HOST': os.environ.get('DB_HOST', '192.168.1.73'),
+        'HOST': os.environ.get('DB_HOST', '172.20.10.2'),
+        # 'HOST': os.environ.get('DB_HOST', '192.168.1.73'), 
         'PORT': os.environ.get('DB_PORT', 5432),
     }
 }
 
 # REDIS
-REDIS_HOST = 'localhost'
+REDIS_HOST = '172.20.10.2'
 REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = ''

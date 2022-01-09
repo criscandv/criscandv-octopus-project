@@ -1,5 +1,6 @@
 from .models import Comments
 from django.shortcuts import render
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
@@ -22,15 +23,23 @@ class ChatViewSet(BaseViewSet):
         return render(request, 'home.html', {})
 
     @action(detail=False, methods=['POST'])
-    def send_chat(self, request, *args, **kwargs):
+    def send_message(self, request, *args, **kwargs):
         try:
             data = request.data.copy()
             message = data.get('message')
-            user_id = self.request.user.id
+            user = self.request.user
 
             comment = Comments()
-            comment.user_id = user_id
+            comment.user_id = user.id
             comment.comment = message
+
+            REDIS_CLIENT = redis.StrictRedis(
+                host=settings.REDIS_HOST,
+                port=settings.REDIS_PORT,
+                db=settings.REDIS_DB
+            )
+
+            REDIS_CLIENT.publish('criscandv-chat', f"{user.username}: {message}")
 
             return Response({
                 'message': 'Successfully posted comment'
@@ -40,3 +49,6 @@ class ChatViewSet(BaseViewSet):
             print("\n\n\n")
             print("err: ", e)
             print("\n\n\n")
+            return Response({
+                'message': 'Internal server error'
+            }, status=status.HTTP_200_OK)
