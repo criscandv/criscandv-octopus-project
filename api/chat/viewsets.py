@@ -32,6 +32,7 @@ class ChatViewSet(BaseViewSet):
             comment = Comments()
             comment.user_id = user.id
             comment.comment = message
+            comment.save()
 
             REDIS_CLIENT = redis.StrictRedis(
                 host=settings.REDIS_HOST,
