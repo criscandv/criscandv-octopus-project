@@ -3,7 +3,7 @@ import { extendTheme } from "@chakra-ui/react";
 // Brand Colors
 const colors = {
   brand: {
-    main: "#f43f5e",
+    main: "#8c03fc",
     secondary: "#840705",
   },
 };

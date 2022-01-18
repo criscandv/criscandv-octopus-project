@@ -1,10 +1,19 @@
 const express = require("express");
+const cors = require("cors");
 const http = require("http");
 const socketIO = require("socket.io");
 const redis = require("redis");
+const querystring = require("querystring");
+const axios = require("axios");
 
 // Environment variables
 require("dotenv").config();
+
+// Server
+const app = express();
+app.set("port", 3001);
+app.use(express.json());
+app.use(cors());
 
 // Redis
 const REDIS_HOST = process.env.REDIS_HOST;
@@ -12,63 +21,75 @@ const REDIS_PORT = process.env.REDIS_PORT;
 const REDIS_DB = process.env.REDIS_DB;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
-const redisClient = redis.createClient({
-  url: `redis://${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}`,
-});
-
-redisClient.on("connect", function () {
-  console.log("connected");
-});
-
-redisClient.on("error", (err) => console.log("Redis Client Error", err));
-
-// Subscribe to chat channel
-redisClient.subscribe("chat");
-
-// Server
-const app = express();
-app.set("port", 3001);
-
-const httpServer = http.createServer(app);
-
-const io = new socketIO.Server(httpServer, {});
-
-io.sockets.on("connection", (socket) => {
-  redisClient.on("message", (channel, message) => {
-    console.log({ message, channel });
-    socket.send(message);
+// const redisClient = redis.createClient({
+//   host: "redis",
+//   port: REDIS_PORT,
+//   db: REDIS_DB,
+// });
+(async () => {
+  const redisClient = redis.createClient({
+    url: process.env.REDIS_URL,
   });
 
-  socket.on("send_message", (body) => {
-    console.log("Message in send_message: ", body);
-    const values = {
-      comment: body.msg,
-    };
+  redisClient.on("error", (err) => {
+    console.log("Redis Client Error", err);
+    return;
+  });
 
-    const options = {
-      host: process.env.DJANGO_HOST,
-      port: process.env.DJANGO_PORT,
-      path: "/v1/chat/send_message/",
-      headers: {
-        "X-Socket-Token": "Custom auth token",
-      },
-    };
+  await redisClient.connect();
 
-    // Send message to Django
-    const req = http.request(options, (res) => {
-      res.on("data", (message) => {
-        console.log("message on data django: ", message);
-      });
+  app.use(express.urlencoded({ extended: true }));
+
+  const httpServer = http.createServer(app);
+
+  const io = new socketIO.Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
+
+  io.sockets.on("connection", async (socket) => {
+    // Subscribe to chat channel
+    await redisClient.subscribe("chat", (message) => {
+      console.log("Message redis", { message });
+      // socket.send(message);
     });
 
-    req.write(values);
-    req.end();
-  });
-});
+    socket.on("send_message", (body) => {
+      const values = querystring.stringify({
+        message: body.message,
+        user_from: body.user,
+        user_to: "ccano",
+      });
 
-// Initialize the server
-const port = app.get("port");
-httpServer.listen(port, () => {
-  console.clear();
-  console.log(`Listening on port ${port}`);
-});
+      const options = {
+        host: process.env.DJANGO_HOST,
+        port: process.env.DJANGO_PORT,
+        path: "/v1/chat/send_message/",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-Socket-Token": "Custom auth token",
+          "Content-Length": values.length,
+        },
+      };
+
+      // Send message to Django
+      const req = http.request(options, (res) => {
+        res.on("data", (message) => {
+          // console.log(`message on data django: ${message}`);
+        });
+      });
+
+      req.write(values);
+      req.end();
+    });
+  });
+
+  // Initialize the server
+  const port = app.get("port");
+  httpServer.listen(port, () => {
+    console.clear();
+    console.log(`Listening on port ${port}`);
+  });
+})();

@@ -38,12 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'chat'
+    'corsheaders',
+    'chat',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -52,6 +54,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'api.urls'
+
+ALLOWED_HOSTS = ['*']
 
 TEMPLATES = [
     {
@@ -82,14 +86,14 @@ DATABASES = {
         'USER': os.environ.get('POSTGRESQL_USER', "postgres" ),
         'PASSWORD': os.environ.get('POSTGRESQL_PASSWORD', 'postgres'),
         # 'HOST': os.environ.get('DB_HOST', '172.20.10.2'),
-        'HOST': os.environ.get('DB_HOST', '192.168.1.73'), 
+        'HOST': os.environ.get('DB_HOST', '192.168.1.150'), 
         'PORT': os.environ.get('DB_PORT', 5432),
     }
 }
 
 # REDIS
 # REDIS_HOST = '172.20.10.2'
-REDIS_HOST = '192.168.1.73'
+REDIS_HOST = '192.168.1.150'
 REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = ''

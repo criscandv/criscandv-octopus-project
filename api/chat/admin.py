@@ -3,7 +3,7 @@ from .models import Comments
 from django.contrib.auth.models import Group
 
 class CommentModelAdmin(admin.ModelAdmin):
-	list_display = ['__str__']
+	list_display = ['user_from', 'user_to', 'has_been_read', 'comment']
 
 	class Meta:
 		model = Comments

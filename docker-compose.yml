@@ -13,16 +13,16 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
-    networks:
-      - django_chat_net
+    # networks:
+    #   - django_chat_net
 
   redis:
     container_name: redis
     image: redis:6.2.6-alpine
     ports:
       - 6379:6379
-    networks:
-      - django_chat_net
+    # networks:
+    #   - django_chat_net
 
   api:
     container_name: octopus_api
@@ -35,8 +35,8 @@ services:
     depends_on:
       - db
       - redis
-    networks:
-      - django_chat_net
+    # networks:
+    #   - django_chat_net
 
   socket:
     container_name: octopus_socket
@@ -48,10 +48,12 @@ services:
       - /usr/src/node_modules
     ports:
       - 3001:3001
+    environment:
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       - redis
-    networks:
-      - django_chat_net
+    # networks:
+    #   - django_chat_net
 
   front:
     container_name: octopus_front
@@ -63,12 +65,11 @@ services:
       - /usr/src/node_modules
     ports:
       - 3000:3000
-    networks:
-      - django_chat_net
+    # networks:
+    #   - django_chat_net
 
 volumes:
   postgres_data:
-
-networks:
-  django_chat_net:
-    driver: bridge
+# networks:
+#   django_chat_net:
+#     driver: bridge
